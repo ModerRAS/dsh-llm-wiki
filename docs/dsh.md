@@ -69,12 +69,27 @@ filenames, and `meta/` generated formats are unchanged — a vault moves
 between the pi build and the DSH build freely. New settings keys are added
 under `llm-wiki.*` only.
 
+## Locale
+
+DeepSeek Harness keeps two locale channels, and they do not share dictionaries.
+
+| Channel | Where | What it localizes |
+|---|---|---|
+| Plugin list | `dsh/locale/en.json`, `dsh/locale/zh.json` | `meta.title` and `meta.description` only. The host reads these through `readPluginMeta`. Extra keys are ignored, and registered dictionaries are not consulted. |
+| WebUI chrome | `STRINGS` in `dsh/client.js`, namespace `llm-wiki` | Settings, sidebar, status panel, and dock chrome. Registered with `ctx.locale.register("llm-wiki", { en, zh })`. Slot entries set `locale: "llm-wiki"` and render with the framework `t` seat. |
+
+`inject()` must not pass `t`. The renderer spreads inject props over the framework seat, and a stable `locale.bind()` would keep memoized children on the previous language. The browser module table cannot load the JSON files, so the screen dictionaries are inlined; `test/dsh/ui-locale.test.ts` checks that `en` and `zh` carry the same keys and the same `{name}` placeholders.
+
+Dock lines and the status notice keep an English `text` and add a `code` (`dock.*`, `notice.*`) in that namespace. The client translates `code` and falls back to `text`. Model-written summaries stay as written. Vault narrative language is `synthesisLanguage`, not this UI locale.
+
+A language pack can add another UI language with `ctx.locale.register("llm-wiki", "<id>", dict)` using the same keys. It cannot replace the shipped `en` or `zh` dictionaries. Plugin-list text for a third language has to ship as `dsh/locale/<id>.json` in this package; packs cannot fill display metadata.
+
 ## Draft status — verify live before merging
 
 Logic is unit-covered (`test/dsh/**`, 61 tests, no Harness required), but
 the following need a live DeepSeek Harness (`0.2.1-rc.3`, desktop profile):
 
-- [ ] Plugin appears with title/description/icon (locale en + zh).
+- [ ] Plugin appears with title/description/icon (locale en + zh from `dsh/locale/*.json`). Settings, sidebar, and the status panel follow Settings → General → Language.
 - [ ] `wiki_status` returns real data in a vault dir, and does not create
       one elsewhere (cwd resolution via `workingDirectory`).
 - [ ] `write`/`str_replace_editor` to `.llm-wiki/raw/**` denied; ordinary
