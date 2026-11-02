@@ -32,7 +32,7 @@ Settings live in the Settings panel → **LLM Wiki** section (WebUI), with
 Settings → Agent presets also lists **LLM Wiki synthesis** (child synthesis lane).
 
 > Settings ≠ status sidebar. The Settings section edits behavior; the
-> **sidebar status panel** (sidebar 🧠 icon → `main` page `wiki-status`)
+> **sidebar status panel** (line-icon entry in `sidebar.panellist` → `main` page `wiki-status`)
 > shows live vault state. It reads `GET /wiki/status.json` from the Host
 > (`src/dsh/status-route.ts`, in-memory `WikiUiState` in `src/dsh/ui-state.ts`;
 > verified live HTTP 200 on web). Path A won — fallback B (session slot +
@@ -75,10 +75,12 @@ DeepSeek Harness keeps two locale channels, and they do not share dictionaries.
 
 | Channel | Where | What it localizes |
 |---|---|---|
-| Plugin list | `dsh/locale/en.json`, `dsh/locale/zh.json` | `meta.title` and `meta.description` only. The host reads these through `readPluginMeta`. Extra keys are ignored, and registered dictionaries are not consulted. |
-| WebUI chrome | `STRINGS` in `dsh/client.js`, namespace `llm-wiki` | Settings, sidebar, status panel, and dock chrome. Registered with `ctx.locale.register("llm-wiki", { en, zh })`. Slot entries set `locale: "llm-wiki"` and render with the framework `t` seat. |
+| Plugin list | `meta` in `dsh/locale/en.json`, `dsh/locale/zh.json` | `readPluginMeta` uses `meta.title` and `meta.description` only. |
+| WebUI chrome | `STRINGS` in `dsh/client.js`, namespace `llm-wiki` | Settings, the card status panel, sidebar, and dock. Registered with `ctx.locale.register("llm-wiki", { en, zh })`. Slot entries set `locale: "llm-wiki"` and render with the framework `t` seat. |
 
-`inject()` must not pass `t`. The renderer spreads inject props over the framework seat, and a stable `locale.bind()` would keep memoized children on the previous language. The browser module table cannot load the JSON files, so the screen dictionaries are inlined; `test/dsh/ui-locale.test.ts` checks that `en` and `zh` carry the same keys and the same `{name}` placeholders.
+The same screen keys are mirrored into `dsh/locale/{en,zh}.json` beside `meta`, for the host bundle. The browser cannot require those files, so the copy that actually renders is `STRINGS`. `test/dsh/ui-locale.test.ts` checks that the mirror, both languages, and the `{name}` placeholders stay aligned.
+
+`inject()` must not pass `t`. The renderer spreads inject props over the framework seat, and a stable `locale.bind()` would keep memoized children on the previous language.
 
 Dock lines and the status notice keep an English `text` and add a `code` (`dock.*`, `notice.*`) in that namespace. The client translates `code` and falls back to `text`. Model-written summaries stay as written. Vault narrative language is `synthesisLanguage`, not this UI locale.
 

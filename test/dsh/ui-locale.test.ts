@@ -53,15 +53,24 @@ function fill(template: string, params: Record<string, string | number>): string
 }
 
 describe("DSH locale", () => {
-  it("keeps plugin-list files to meta.title and meta.description", () => {
-    for (const lang of ["en", "zh"]) {
+  it("mirrors the screen dictionary beside plugin-list meta", () => {
+    const { en, zh } = dictionaries();
+    for (const [lang, dict] of [
+      ["en", en],
+      ["zh", zh],
+    ] as const) {
       const doc = JSON.parse(read(`dsh/locale/${lang}.json`)) as {
         meta?: { title?: string; description?: string };
-      };
-      expect(Object.keys(doc)).toEqual(["meta"]);
-      expect(Object.keys(doc.meta ?? {}).sort()).toEqual(["description", "title"]);
-      expect(doc.meta?.title?.trim().length).toBeGreaterThan(0);
-      expect(doc.meta?.description?.trim().length).toBeGreaterThan(0);
+      } & Record<string, unknown>;
+      expect(doc.meta?.title).toBe(dict["meta.title"]);
+      expect(doc.meta?.description).toBe(dict["meta.description"]);
+      const screen = Object.keys(dict).filter((key) => !key.startsWith("meta."));
+      expect(
+        Object.keys(doc)
+          .filter((key) => key !== "meta")
+          .sort(),
+      ).toEqual(screen.sort());
+      for (const key of screen) expect(doc[key], `${lang}:${key}`).toBe(dict[key]);
     }
   });
 
@@ -122,16 +131,18 @@ describe("DSH locale", () => {
     expect(en["notice.blocked"]).toBe("Wiki setup blocked (bootstrap).");
   });
 
-  it("translates the status tokens the host actually emits", () => {
+  it("recognizes the status tokens the host emits", () => {
     const runners = read("src/dsh/runners.ts");
+    const client = read("dsh/client.js");
     const { en } = dictionaries();
-    for (const token of ["🔴 Empty", "⚠️ Warning", "✅ Good"]) {
+    for (const token of ["🔴 Empty", "⚠️ Warning", "✅ Good", "available", "missing", "unknown"]) {
       expect(runners).toContain(token);
-      expect(Object.values(en)).toContain(token);
     }
-    for (const token of ["available", "missing", "unknown"]) {
-      expect(runners).toContain(token);
-      expect(Object.values(en)).toContain(token);
-    }
+    expect(client).toContain('tr(t, "panel.badge.empty", "Empty")');
+    expect(client).toContain('tr(t, "panel.badge.warning", "Warning")');
+    expect(client).toContain('tr(t, "panel.badge.good", "Good")');
+    expect(en["panel.badge.available"]).toBe("Available");
+    expect(en["panel.badge.missing"]).toBe("Missing");
+    expect(en["panel.badge.unknown"]).toBe("Unknown");
   });
 });
