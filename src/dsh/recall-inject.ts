@@ -38,6 +38,7 @@ import {
 } from "../../extensions/llm-wiki/lib/task-config.js";
 import { resolveProjectVaultRoot, resolveVaultPaths } from "../../extensions/llm-wiki/lib/utils.js";
 import type { DshRuntime } from "./background.js";
+import { createInjectedUserMessage } from "./injected-message.js";
 import type { WikiLogger } from "./logger.js";
 import type { DshAgent, DshContext, PreStepDecision } from "./types.js";
 import { patchUiState, pushSessionLine } from "./ui-state.js";
@@ -255,11 +256,7 @@ export function installPreStepListener(
       } catch {
         /* UI state must never break the turn */
       }
-      const recallMessage = {
-        role: "user",
-        content: [{ type: "text", text: recallBlock }],
-        source: { kind: "llm-wiki-recall" },
-      };
+      const recallMessage = createInjectedUserMessage(recallBlock, { kind: "llm-wiki-recall" });
       return { ...decision, messages: [...(decision.messages ?? []), recallMessage] };
     } catch (error) {
       // A throwing pre-step listener fails the whole turn — degrade to the

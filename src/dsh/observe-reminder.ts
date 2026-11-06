@@ -26,6 +26,7 @@ import {
   resolveReminderTurns,
 } from "../../extensions/llm-wiki/lib/task-config.js";
 import { resolveProjectVaultRoot, resolveVaultPaths } from "../../extensions/llm-wiki/lib/utils.js";
+import { createInjectedUserMessage } from "./injected-message.js";
 import type { WikiLogger } from "./logger.js";
 import { agentCwdFor, isMainSession } from "./recall-inject.js";
 import type { DshAgent, DshContext, PreStepDecision } from "./types.js";
@@ -177,11 +178,7 @@ export function installObservationReminder(ctx: DshContext, logger?: WikiLogger)
         interval: resolveReminderTurns(config),
       });
       if (!remind) return decision;
-      const reminder = {
-        role: "user",
-        content: [{ type: "text", text: REMINDER_TEXT }],
-        source: { kind: "llm-wiki-reminder" },
-      };
+      const reminder = createInjectedUserMessage(REMINDER_TEXT, { kind: "llm-wiki-reminder" });
       return { ...decision, messages: [...(decision.messages ?? []), reminder] };
     } catch (error) {
       // A throwing pre-step listener fails the whole turn — degrade instead.

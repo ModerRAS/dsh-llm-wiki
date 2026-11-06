@@ -165,6 +165,11 @@ describe("installObservationReminder (DSH hooks)", () => {
     expect(fifth.messages).toHaveLength(2);
     expect(fifth.messages?.[0]).toMatchObject({ role: "user", content: "do the work" });
     expect(fifth.messages?.[1]).toMatchObject({
+      // Regression: DSH's session restore rejects a message event without an
+      // id, and one such event makes the whole session log unloadable.
+      id: expect.stringMatching(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+      ),
       role: "user",
       source: { kind: "llm-wiki-reminder" },
       content: [{ type: "text", text: REMINDER_TEXT }],

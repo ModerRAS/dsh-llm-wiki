@@ -41,7 +41,17 @@ export interface DshAgent {
   [key: string]: unknown;
 }
 
-/** Waterfall decision for `agent/pre-step`. `messages` is a REPLACEMENT. */
+/**
+ * Waterfall decision for `agent/pre-step`. `messages` is a REPLACEMENT.
+ *
+ * The harness persists every accepted entry as a `user/message` session event
+ * and validates those events on restore, so an entry must be a COMPLETE DSH
+ * message — not a `{ role, content, source }` look-alike. In particular it must
+ * carry a non-empty `id`: an id-less message makes the whole session log
+ * unloadable (`session event at seq N lacks an identified message`). Build
+ * injected entries with `createInjectedUserMessage()` from
+ * `./injected-message.js` instead of a hand-rolled literal.
+ */
 export interface PreStepDecision {
   kind: "enter" | "reject";
   messages?: unknown[];
