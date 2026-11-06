@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.6.4] - 2026-11-06
+
 ### Added
 - **Plugin-owned proactive capture in the DSH plugin** (Settings → LLM Wiki): a new static `<wiki_policy>` system-prompt section (`proactiveCapture`, default on) tells the model to `wiki_recall` before non-trivial work, to `wiki_observe` / `wiki_retro` / `wiki_ensure_page` during and after it, and to `wiki_capture_source` → `wiki_ingest` for external material. It replaces the machine-local `~/.dsh/AGENTS.md` + `~/.dsh/skills/llm-wiki` workaround (deleted, never shipped): the behavior now belongs to the plugin, so every install gets it, and the text is byte-stable so the provider prefix cache stays warm.
 - **DSH observation reminder** (`observationReminder`, `reminderTurns`): the pi `agent_end` nudge ported onto the hooks DSH has — a turn is counted once at `agent/pre-step` (`step === 1`, deduped on `payload.turn`), any `wiki_observe` / `wiki_retro` / `wiki_ensure_page` / `wiki_ingest` / `wiki_capture_source` seen on `tools/result` silences it for that session, and the reminder is APPENDED to `decision.messages` with `source: { kind: "llm-wiki-reminder" }`. Main sessions only, only where a vault applies, state dropped on `agent/disposed`.

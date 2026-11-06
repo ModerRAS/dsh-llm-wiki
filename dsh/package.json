@@ -1,6 +1,6 @@
 {
   "name": "dsh-llm-wiki",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "private": true,
   "description": "LLM Wiki as a native DeepSeek Harness plugin \u2014 self-maintaining, Obsidian-compatible knowledge base.",
   "type": "module",

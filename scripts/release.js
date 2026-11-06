@@ -64,6 +64,16 @@ const plugin = JSON.parse(fs.readFileSync(pluginPath, "utf-8"));
 plugin.version = next;
 fs.writeFileSync(pluginPath, `${JSON.stringify(plugin, null, 2)}\n`, "utf-8");
 
+// The DSH bundle is its own manifest (dsh/package.json, packaged as
+// dsh-llm-wiki and installed via plugin_manager); a release that skipped it
+// left the installed plugin reporting the previous version.
+const bundlePath = path.join(__dirname, "..", "dsh", "package.json");
+if (fs.existsSync(bundlePath)) {
+  const bundle = JSON.parse(fs.readFileSync(bundlePath, "utf-8"));
+  bundle.version = next;
+  fs.writeFileSync(bundlePath, `${JSON.stringify(bundle, null, 2)}\n`, "utf-8");
+}
+
 // Update CHANGELOG
 const changelogPath = path.join(__dirname, "..", "CHANGELOG.md");
 let changelog = "";
@@ -81,7 +91,9 @@ if (changelog.includes("## [Unreleased]")) {
 }
 fs.writeFileSync(changelogPath, changelog, "utf-8");
 
-execSync("git add package.json CHANGELOG.md .claude-plugin/plugin.json", { stdio: "inherit" });
+execSync("git add package.json CHANGELOG.md .claude-plugin/plugin.json dsh/package.json", {
+  stdio: "inherit",
+});
 execSync(`git commit -m "chore(release): v${next}"`, { stdio: "inherit" });
 execSync(`git tag v${next}`, { stdio: "inherit" });
 console.log(`\n✅ Committed and tagged v${next}`);
