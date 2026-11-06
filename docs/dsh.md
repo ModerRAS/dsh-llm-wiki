@@ -105,6 +105,32 @@ Main sessions only (subagents skip), and only when a wiki applies (project vault
 or an ambient personal vault that is actually bootstrapped). Settings:
 `observationReminder` (default on) and `reminderTurns` (default 5, minimum 1).
 
+## Injected messages must carry an identity
+
+DSH persists every accepted `decision.messages` entry as a `user/message` session
+event, and its restore path re-validates those events against `MessageBase`: a
+message needs a non-empty `id`. The live write path does **not** check that id,
+so a message literal written without one looks fine for the rest of the session
+and then fails on the next cold read:
+
+```text
+stored session "<session>" is corrupt: … failed validation:
+session event at seq N lacks an identified message
+```
+
+The failure is per session, not per event: one id-less injection makes the whole
+log unloadable, and the harness ships no repair command. `PreStepDecision.messages`
+is typed `unknown[]` in `src/dsh/types.ts`, so TypeScript does not catch it
+either.
+
+`src/dsh/injected-message.ts` (`createInjectedUserMessage`) is the only builder
+both `agent/pre-step` injection sites use — the recall (`llm-wiki-recall`) and
+the observation reminder (`llm-wiki-reminder`). It stamps
+`id: randomUUID()`, `role: "user"`, text content, and the source tag. Add new
+injections through it instead of a hand-rolled literal;
+`test/dsh/injected-message.test.ts` pins the shape and
+`test/dsh/recall-inject.test.ts` covers the append site end to end.
+
 Pure queries are slash commands (`/wiki-status`, `/wiki-search`,
 `/wiki-recall`, `/wiki-lint`); work-initiating commands (`/wiki-bootstrap`,
 `/wiki-capture`, `/wiki-ingest`) queue a followup prompt so upstream
@@ -128,6 +154,7 @@ semantics survive the "commands create no model message" rule.
 | Former TUI settings → WebUI section; other commands stay slash; Config fields `.volatile()` for describe/whileServed | `src/dsh/settings-ui.ts`, `dsh/client.js`, `src/dsh/commands.ts` |
 | Row config → runtime config bridge (GUI wins per key, cache cleared) | `src/dsh/index.ts` (`apply`), `src/dsh/vault-state.ts` (`setDshConfigOverrides`, `resolveRowConfig`) |
 | Proactive-capture policy + observation reminder (plugin-owned, no env files) | `src/dsh/recall-inject.ts` (`WIKI_POLICY_BLOCK`), `src/dsh/observe-reminder.ts` |
+| Injected `agent/pre-step` messages (uuid identity; a missing id makes the session unloadable) | `src/dsh/injected-message.ts` (`createInjectedUserMessage`) |
 | Approval: allow-listed programs + directories, else deny | `src/dsh/approval.ts` |
 | Minimal `lib/**` patches (each marked `DSH-PATCH` with reason) | `lib/host.ts` (dsh host), `lib/utils.ts` (atomic `writeJson`), `lib/guardrails.ts` (pi-import-free) |
 
