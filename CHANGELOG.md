@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.6.5] - 2026-11-07
+
 ### Fixed
 - **DSH install bundle is self-contained (`pnpm pack:dsh`)**: v0.6.4 was
   hand-packed with the dev Host entry (`../dist/...`), so the installed
