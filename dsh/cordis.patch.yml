@@ -1,8 +1,12 @@
 # LLM Wiki — DSH bundle patch (Loader YAML dialect).
 #
-# Install with plugin_manager `install_bundle` pointing at the `dsh/`
-# directory AFTER `pnpm build:dsh` (the Host entry re-exports ../dist).
-# Do not hand-edit the profile's package.json / cordis.patch.yml.
+# Install with `pnpm pack:dsh` (builds dist, stages a self-contained package,
+# rewrites the Host entry to `./dist/...`, tars `build/dsh-llm-wiki-<v>.tgz`)
+# then `plugin_manager` → `install_bundle` with the tarball.
+# Do NOT install the raw `dsh/` directory and do NOT hand-pack: the repo
+# entry points at `../dist/...` (dev layout) and a hand-packed bundle ships
+# a dead Host import (v0.6.4 lesson). Do not hand-edit the profile's
+# package.json / cordis.patch.yml.
 - insert:
     - id: llm-wiki
       name: 'dsh-llm-wiki'
