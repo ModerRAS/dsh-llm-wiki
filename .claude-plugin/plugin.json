@@ -1,7 +1,7 @@
 {
   "name": "llm-wiki",
   "displayName": "LLM Wiki",
-  "version": "0.6.5",
+  "version": "0.6.6",
   "description": "Self-maintaining LLM wiki (Karpathy pattern): recall, observe, retro, capture sources, ensure pages, lint, and ingest. 15 tools over MCP.",
   "author": {
     "name": "Zosma AI",

@@ -65,6 +65,18 @@ for (const entry of ["client.js", "cordis.patch.yml", "icon.svg", "package.json"
 cpSync(join(ROOT, "dsh", "locale"), join(stage, "locale"), { recursive: true });
 cpSync(join(ROOT, "dist", "dsh"), join(stage, "dist", "dsh"), { recursive: true });
 
+// The bundle installs standalone into a profile: an empty `dependencies`
+// ships a plugin that dies at import (v0.6.5 lesson:
+// `Cannot find package 'mdast-util-from-markdown'`). `dsh/package.json` is
+// the source of truth — keep its dependency set in sync with the dist
+// imports actually reachable from the Host entry.
+const stagedPkg = readJson(join(stage, "package.json"));
+if (!stagedPkg.dependencies || Object.keys(stagedPkg.dependencies).length === 0) {
+  throw new Error(
+    "pack-dsh: staged manifest has no dependencies — the bundle would fail to import",
+  );
+}
+
 // 4. Rewrite the dev entry to the in-package entry. Throw on drift so a
 //    future host-index.js refactor fails loudly here instead of shipping a
 //    dead bundle.
