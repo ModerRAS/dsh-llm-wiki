@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [0.6.5] - 2026-11-07
+
+### Fixed
+- **DSH install bundle is self-contained (`pnpm pack:dsh`)**: v0.6.4 was
+  hand-packed with the dev Host entry (`../dist/...`), so the installed
+  plugin's import failed and the whole plugin stayed down (`fiberPhase:
+  null` — no wiki tools, no `/wiki-*` commands, no `/wiki/status.json`,
+  surfacing in the WebUI as `Unexpected end of JSON input`). New
+  `scripts/pack-dsh.js` stages `dsh/` + `dist/dsh/`, rewrites the entry to
+  `./dist/...`, refuses version drift between `package.json` and
+  `dsh/package.json`, tars `build/dsh-llm-wiki-<version>.tgz`, and verifies
+  by re-extracting. `docs/dsh.md` and `dsh/cordis.patch.yml` now document
+  the tarball flow; never install the raw `dsh/` directory.
+
 ## [0.6.4] - 2026-11-06
 
 ### Added

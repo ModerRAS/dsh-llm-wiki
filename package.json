@@ -1,6 +1,6 @@
 {
   "name": "@zosmaai/pi-llm-wiki",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "description": "Self-maintaining LLM Wiki for Pi — Karpathy-pattern knowledge base with immutable source capture, automated ingestion, search, linting, and Obsidian-compatible vault. auto-updating personal & company wiki.",
   "keywords": [
     "pi",
@@ -64,6 +64,7 @@
     "test:coverage": "vitest run --coverage",
     "build:commands": "node scripts/build-commands.js",
     "build:dsh": "node scripts/build-dsh.js",
+    "pack:dsh": "node scripts/pack-dsh.js",
     "build:mcp": "node scripts/build-mcp.js",
     "prepack": "node scripts/build-commands.js && node scripts/build-mcp.js",
     "typecheck": "tsc --noEmit",

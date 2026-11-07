@@ -8,6 +8,7 @@ outputs/
 .omp/
 coverage/
 dist/
+build/
 .llm-wiki/
 tmp/
 .astro/

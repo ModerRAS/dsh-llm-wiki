@@ -17,13 +17,16 @@ release cycle; the MCP server (`mcp/`) is kept as an alternative access path.
 
 ## Install (local, draft)
 
-1. `pnpm build:dsh` — compiles `src/dsh` + `src/compat` + reused lib cores
-   into `dist/dsh/` (the tree `dsh/host-index.js` re-exports). The build
-   also rewrites the single pi-only import (`getAgentDir`, absent from the
-   DSH host) to a local stub in dist only — shipped sources stay identical
-   for pi/omp/tests.
-2. In DeepSeek Harness: `plugin_manager` → `install_bundle` with the
-   absolute `dsh/` directory.
+1. `pnpm pack:dsh` — builds `src/dsh` + `src/compat` + reused lib cores into
+   `dist/dsh/`, stages a self-contained package (Host entry rewritten to
+   `./dist/...`), and tars `build/dsh-llm-wiki-<version>.tgz`. The script
+   verifies the bundle by re-extracting it (entry must be self-contained,
+   dist tree present, `node --check` clean).
+2. In DeepSeek Harness: `plugin_manager` → `install_bundle` with the tarball
+   — never the raw `dsh/` directory. Its `host-index.js` points at
+   `../dist/...` (repo dev layout), which resolves outside an installed
+   bundle and leaves the plugin down (`fiberPhase: null`, no tools, no
+   `/wiki/status.json`) — the v0.6.4 outage.
 3. The plugin row `llm-wiki` activates on HMR; open a project with (or
    without — it bootstraps silently) a `.llm-wiki/` vault.
 
