@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [0.6.6] - 2026-11-08
+
+### Fixed
+- **DSH bundle declares its runtime dependencies**: the repo manifest
+  (`dsh/package.json`) carried none, so the packed 0.6.5 bundle installed
+  standalone with zero deps and died at import (`Cannot find package
+  'mdast-util-from-markdown'`, plugin still down). Restored the proven 0.6.3
+  dependency set (`@deepseek-ai/schemastery`, `mdast-util-from-markdown`,
+  `node-html-markdown`, `typebox`, `yaml`, optional `@tobilu/qmd`), added
+  `dist` to `files`, dropped `private`; `pack:dsh` now refuses a dep-less
+  stage.
+
 ## [0.6.5] - 2026-11-07
 
 ### Fixed
