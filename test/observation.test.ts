@@ -178,6 +178,124 @@ describe("wiki observation", () => {
     expect(result.slug).not.toContain("//");
     expect(result.slug).not.toContain("_");
   });
+
+  it("should keep non-Latin titles in the slug instead of collapsing to an empty one", () => {
+    const paths = getVaultPaths(vaultDir);
+    const result = saveObservation(paths, {
+      title: "中文标题观察",
+      content: "中文内容",
+      relevance: "low",
+    });
+
+    expect(result.slug).toContain("中文标题观察");
+    expect(existsSync(result.pagePath)).toBe(true);
+  });
+
+  it("should not overwrite an existing same-day observation with an identical title", () => {
+    const paths = getVaultPaths(vaultDir);
+    const first = saveObservation(paths, {
+      title: "重复标题",
+      content: "first call",
+      relevance: "low",
+    });
+    const second = saveObservation(paths, {
+      title: "重复标题",
+      content: "second call",
+      relevance: "low",
+    });
+
+    expect(second.slug).not.toBe(first.slug);
+    expect(existsSync(first.pagePath)).toBe(true);
+    expect(existsSync(second.pagePath)).toBe(true);
+    expect(readFileSync(first.pagePath, "utf-8")).toContain("first call");
+    expect(readFileSync(second.pagePath, "utf-8")).toContain("second call");
+  });
+
+  it("should truncate the slug on code-point boundaries without a trailing separator", () => {
+    const paths = getVaultPaths(vaultDir);
+    // 60 UTF-16 units lands inside a surrogate pair: the old .slice(0, 60) left a
+    // lone surrogate behind (encodeURIComponent rejects it) and a trailing dash.
+    const result = saveObservation(paths, {
+      title: `a${"\u{20000}".repeat(40)}`,
+      content: "astral-plane truncation",
+      relevance: "low",
+    });
+    expect(() => encodeURIComponent(result.slug)).not.toThrow();
+
+    const long = saveObservation(paths, {
+      title: `${"a".repeat(58)} ${"b".repeat(10)}`,
+      content: "separator at the truncation boundary",
+      relevance: "low",
+    });
+    expect(long.slug.endsWith("-")).toBe(false);
+  });
+
+  it("should not overwrite a file that already occupies the slug path", () => {
+    const paths = getVaultPaths(vaultDir);
+    const claimed = saveObservation(paths, {
+      title: "Foreign claim",
+      content: "first",
+      relevance: "low",
+    });
+    writeFileSync(claimed.pagePath, "sentinel", "utf-8");
+
+    const second = saveObservation(paths, {
+      title: "Foreign claim",
+      content: "second",
+      relevance: "low",
+    });
+
+    expect(second.slug).toBe(`${claimed.slug}-2`);
+    expect(readFileSync(claimed.pagePath, "utf-8")).toBe("sentinel");
+    expect(readFileSync(second.pagePath, "utf-8")).toContain("second");
+  });
+  // DSH fork (task-4): the bug this fork hit on its own Chinese vault — two
+  // same-day observations must never share a page, and a CJK title must keep a
+  // readable slug instead of collapsing to `obs-YYYY-MM-DD-`.
+  it("keeps two different same-day Chinese titles as separate, readable pages", () => {
+    const paths = getVaultPaths(vaultDir);
+    const first = saveObservation(paths, {
+      title: "跨任务的上下文纪律",
+      content: "第一条中文观察",
+      relevance: "low",
+    });
+    const second = saveObservation(paths, {
+      title: "子代理的边界",
+      content: "第二条中文观察",
+      relevance: "low",
+    });
+
+    expect(first.slug).toContain("跨任务的上下文纪律");
+    expect(second.slug).toContain("子代理的边界");
+    expect(first.slug).not.toBe(second.slug);
+    expect(first.slug).not.toMatch(/^obs-\d{4}-\d{2}-\d{2}-$/);
+    expect(second.slug).not.toMatch(/^obs-\d{4}-\d{2}-\d{2}-$/);
+    expect(existsSync(first.pagePath)).toBe(true);
+    expect(existsSync(second.pagePath)).toBe(true);
+    expect(readFileSync(first.pagePath, "utf-8")).toContain("第一条中文观察");
+    expect(readFileSync(second.pagePath, "utf-8")).toContain("第二条中文观察");
+  });
+
+  it("leaves the ASCII slug algorithm unchanged (backward compatibility)", () => {
+    const paths = getVaultPaths(vaultDir);
+    const title = "Hello World! A/B_c 123";
+    const result = saveObservation(paths, { title, content: "ascii baseline", relevance: "low" });
+
+    // Byte-for-byte the pre-fix algorithm for ASCII titles.
+    const expectedBase = title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 60);
+    expect(result.slug.endsWith(`-${expectedBase}`)).toBe(true);
+  });
+
+  it("falls back to `untitled` for a title with no letters or digits at all", () => {
+    const paths = getVaultPaths(vaultDir);
+    const result = saveObservation(paths, { title: "!!! ??? ...", content: "punctuation only", relevance: "low" });
+
+    expect(result.slug).toMatch(/^obs-\d{4}-\d{2}-\d{2}-untitled$/);
+  });
 });
 
 // ─── registerObservationReminder (retry deduplication) ──────────────────────

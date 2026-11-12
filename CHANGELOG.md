@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- **Non-Latin observation titles collapsed into one page per day** (port of upstream [PR #245](https://github.com/zosmaai/pi-llm-wiki/pull/245), not merged upstream yet): `saveObservation` derived its slug with `/[^a-z0-9]+/g`, so a title without ASCII letters or digits (any Chinese/Japanese/Korean title) produced an empty slug base and every observation that day resolved to the same `obs-YYYY-MM-DD-.md` — the later write silently overwrote the earlier one while `wiki_observe` reported success. The vault on the machine that hit this carried 15 such files, one per day. The slug now keeps `\p{L}\p{N}` runs (everything else becomes `-`, truncation counts code points so a surrogate pair is never split, and the result falls back to `untitled` when nothing survives). The write reserves the filename with the exclusive `wx` flag, so a collision retries as `-2`, `-3`, … instead of overwriting; the `slug` written to `meta/events.jsonl` and returned to the caller is the final one. `writeKnowledgeDocumentFile` gained an optional `{ flag }` argument (default `w`) for that. ASCII titles keep the previous slug byte-for-byte. New tests cover CJK slug readability, two different same-day CJK titles, a duplicate same-day title, the `-2` suffix against a foreign file, code-point truncation, the `untitled` fallback, and ASCII backward compatibility.
+
 ## [0.6.6] - 2026-11-08
 
 ### Fixed
