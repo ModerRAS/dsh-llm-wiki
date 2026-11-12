@@ -129,10 +129,7 @@ describe("withVaultWrite (process singleton, H30)", () => {
       await new Promise((r) => setTimeout(r, 10));
       concurrent--;
     };
-    await Promise.all([
-      withVaultWrite(`${base}/a`, work),
-      withVaultWrite(`${base}/b`, work),
-    ]);
+    await Promise.all([withVaultWrite(`${base}/a`, work), withVaultWrite(`${base}/b`, work)]);
     expect(maxConcurrent).toBe(2);
   });
 

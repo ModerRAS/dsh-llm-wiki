@@ -34,7 +34,7 @@ function createElement(
   const next: Record<string, unknown> = { ...(props ?? {}) };
   if (flat.length > 0 && next.children == null) next.children = flat.length === 1 ? flat[0] : flat;
   if (typeof type === "function") return type(next);
-  return { type, props: next, children: flat } satisfies Node;
+  return { type: type as string, props: next, children: flat } satisfies Node;
 }
 
 const react = {
@@ -220,7 +220,7 @@ describe("dsh webui status panel", () => {
       found.get("sidebar.panellist:wiki-status") as (props: Record<string, unknown>) => Node,
       { size: 16 },
       [],
-    );
+    ) as Node;
     expect(glyph.type).toBe("svg");
     expect(glyph.props.stroke).toBe("currentColor");
     expect(glyph.props.strokeWidth).toBe(1);

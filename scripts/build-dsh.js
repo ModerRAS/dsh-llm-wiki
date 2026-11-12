@@ -9,9 +9,13 @@ import { join } from "node:path";
 // spawning `node_modules/.bin/tsc`: that path is a shell script on POSIX but a
 // Windows `tsc.cmd` + extensionless shim pair, so `execFileSync` fails with
 // ENOENT on Windows. Invoking the compiler's JS entry works on both.
-execFileSync(process.execPath, [join("node_modules", "typescript", "bin", "tsc"), "-p", "tsconfig.dsh.json"], {
-  stdio: "inherit",
-});
+execFileSync(
+  process.execPath,
+  [join("node_modules", "typescript", "bin", "tsc"), "-p", "tsconfig.dsh.json"],
+  {
+    stdio: "inherit",
+  },
+);
 
 // DSH-PATCH (D8): `@earendil-works/pi-coding-agent` is not shipped in the
 // DSH host process, but `lib/host.ts` statically imports `getAgentDir` from

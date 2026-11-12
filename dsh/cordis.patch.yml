@@ -9,7 +9,7 @@
 # package.json / cordis.patch.yml.
 - insert:
     - id: llm-wiki
-      name: 'dsh-llm-wiki'
+      name: "dsh-llm-wiki"
       # Empty on purpose: Settings → LLM Wiki writes a key here only when the
       # user saves it, and the plugin gives those explicit row values
       # precedence over `llm-wiki` settings files. Seeding defaults here would
@@ -20,7 +20,7 @@
     # Never sets registry `default` (stays Standard / user choice) and never
     # touches the main Standard preset (H13: no commit tools in main mode).
     - id: preset-llm-wiki-synthesis
-      name: '@deepseek-ai/dsh-agent-preset'
+      name: "@deepseek-ai/dsh-agent-preset"
       config:
         id: llm-wiki-synthesis
         order: 5
@@ -28,7 +28,7 @@
         description: Synthesis-only child for wiki ingest (outputSchema / JSON handoff).
         plugins:
           - id: persona
-            name: '@deepseek-ai/dsh-persona'
+            name: "@deepseek-ai/dsh-persona"
             config:
               prefix: |
                 You synthesize wiki pages. Reply with structured JSON only when asked.

@@ -402,7 +402,7 @@ describe("createDshRuntime needsLlm whenIdle wrap (T5/T6)", () => {
       },
     });
     harness.setDriving(false);
-    const idleP = (harness.agent as { whenIdle: () => Promise<void> }).whenIdle();
+    const idleP = (harness.agent as unknown as { whenIdle: () => Promise<void> }).whenIdle();
     harness.releaseIdle();
     await new Promise((r) => setTimeout(r, 5));
     (harness.agent as { inject: (input: unknown) => void }).inject = () => {
@@ -421,7 +421,6 @@ describe("createDshRuntime needsLlm whenIdle wrap (T5/T6)", () => {
     ).toBe(true);
     runtime.dispose();
   });
-
 });
 
 describe("watchCompaction drain (T10.9/H20)", () => {

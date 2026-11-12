@@ -292,7 +292,11 @@ describe("wiki observation", () => {
 
   it("falls back to `untitled` for a title with no letters or digits at all", () => {
     const paths = getVaultPaths(vaultDir);
-    const result = saveObservation(paths, { title: "!!! ??? ...", content: "punctuation only", relevance: "low" });
+    const result = saveObservation(paths, {
+      title: "!!! ??? ...",
+      content: "punctuation only",
+      relevance: "low",
+    });
 
     expect(result.slug).toMatch(/^obs-\d{4}-\d{2}-\d{2}-untitled$/);
   });

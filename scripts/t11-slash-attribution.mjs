@@ -4,8 +4,9 @@
  * adapter, so typing "/wiki-status" into headless still goes to the model;
  * this harness is the discriminating execute→command/run|done path.
  */
-import { createRequire } from "node:module";
+
 import { mkdtempSync, rmSync } from "node:fs";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -20,11 +21,21 @@ const { default: SessionStore, SessionId } = await import(
 );
 
 const wikiRoot = "/workspace/projects/dsh-llm-wiki";
-const { bootstrapVault } = await import(pathToFileURL(join(wikiRoot, "dist/dsh/extensions/llm-wiki/lib/bootstrap.js")).href);
-const { getVaultPaths } = await import(pathToFileURL(join(wikiRoot, "dist/dsh/extensions/llm-wiki/lib/utils.js")).href);
-const { createDshRuntime } = await import(pathToFileURL(join(wikiRoot, "dist/dsh/src/dsh/background.js")).href);
-const { registerWikiCommands } = await import(pathToFileURL(join(wikiRoot, "dist/dsh/src/dsh/commands.js")).href);
-const { createLogger } = await import(pathToFileURL(join(wikiRoot, "dist/dsh/src/dsh/logger.js")).href);
+const { bootstrapVault } = await import(
+  pathToFileURL(join(wikiRoot, "dist/dsh/extensions/llm-wiki/lib/bootstrap.js")).href
+);
+const { getVaultPaths } = await import(
+  pathToFileURL(join(wikiRoot, "dist/dsh/extensions/llm-wiki/lib/utils.js")).href
+);
+const { createDshRuntime } = await import(
+  pathToFileURL(join(wikiRoot, "dist/dsh/src/dsh/background.js")).href
+);
+const { registerWikiCommands } = await import(
+  pathToFileURL(join(wikiRoot, "dist/dsh/src/dsh/commands.js")).href
+);
+const { createLogger } = await import(
+  pathToFileURL(join(wikiRoot, "dist/dsh/src/dsh/logger.js")).href
+);
 
 const vault = mkdtempSync(join(tmpdir(), "t11-slash-"));
 const wikiHome = mkdtempSync(join(tmpdir(), "t11-slash-home-"));
@@ -50,7 +61,8 @@ const agent = {
 const logger = createLogger(undefined);
 const runtime = createDshRuntime(ctx, logger);
 const registered = registerWikiCommands({ ctx, runtime, logger });
-if (registered.length < 8) throw new Error(`expected >=8 commands, got ${registered.length}: ${registered}`);
+if (registered.length < 8)
+  throw new Error(`expected >=8 commands, got ${registered.length}: ${registered}`);
 
 const signal = AbortSignal.timeout(30_000);
 
@@ -63,7 +75,12 @@ const statusLifecycle = session
   .map((e) => ({ type: e.type, name: e.data?.name, kind: e.data?.kind ?? e.data?.outcome?.kind }));
 
 // T11.2 work path: /wiki-bootstrap → followup with llm-wiki-command source
-const bootExec = await ctx.commands.execute(agent, "/wiki-bootstrap T11 attribution topic", [], signal);
+const bootExec = await ctx.commands.execute(
+  agent,
+  "/wiki-bootstrap T11 attribution topic",
+  [],
+  signal,
+);
 if (!bootExec) throw new Error("wiki-bootstrap execute returned undefined");
 
 const report = {
@@ -93,7 +110,10 @@ if (statusExec.result?.kind !== "success") throw new Error("status not success")
 if (!String(statusExec.result.text || "").includes("LLM Wiki Status")) {
   throw new Error("status text missing");
 }
-if (!statusLifecycle.some((e) => e.type === "command/run") || !statusLifecycle.some((e) => e.type === "command/done")) {
+if (
+  !statusLifecycle.some((e) => e.type === "command/run") ||
+  !statusLifecycle.some((e) => e.type === "command/done")
+) {
   throw new Error("missing command lifecycle events");
 }
 if (followups.length < 1 || followups[0]?.source?.kind !== "llm-wiki-command") {
