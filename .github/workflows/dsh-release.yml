@@ -1,0 +1,80 @@
+name: Release DSH Bundle
+
+on:
+  push:
+    tags:
+      - "dsh-*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing dsh-* tag to rebuild and publish
+        required: true
+        default: dsh-0.6.7
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dsh-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Pack and publish dsh-llm-wiki
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: "true"
+
+      - name: Build and pack the DSH bundle
+        run: pnpm pack:dsh
+
+      - name: Resolve tag, version, and the latest alias
+        id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            tag="${{ inputs.tag }}"
+          else
+            tag="${GITHUB_REF_NAME}"
+          fi
+          version="${tag#dsh-}"
+          tgz="build/dsh-llm-wiki-${version}.tgz"
+          test -f "$tgz"
+          cp "$tgz" build/dsh-llm-wiki-latest.tgz
+          sha256sum "$tgz" build/dsh-llm-wiki-latest.tgz
+          {
+            echo "tag=$tag"
+            echo "version=$version"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create or update the GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${{ steps.release.outputs.tag }}"
+          version="${{ steps.release.outputs.version }}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" build/dsh-llm-wiki-*.tgz --clobber
+          else
+            gh release create "$tag" build/dsh-llm-wiki-*.tgz \
+              --title "dsh-llm-wiki ${version}" \
+              --generate-notes
+          fi
+          echo "release: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${tag}"
