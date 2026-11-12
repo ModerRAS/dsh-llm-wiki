@@ -510,10 +510,24 @@ by [`.github/workflows/contributors.yml`](.github/workflows/contributors.yml).
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/ModerRAS">
+                    <img src="https://avatars.githubusercontent.com/u/28183976?v=4" width="64;" alt="ModerRAS"/>
+                    <br />
+                    <sub><b>ModerRAS</b></sub>
+                </a>
+            </td>
+            <td align="center">
                 <a href="https://github.com/mkuhl">
                     <img src="https://avatars.githubusercontent.com/u/61073?v=4" width="64;" alt="mkuhl"/>
                     <br />
                     <sub><b>Mike P. Kuhl</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/ModerEAS">
+                    <img src="https://avatars.githubusercontent.com/u/44559841?v=4" width="64;" alt="ModerEAS"/>
+                    <br />
+                    <sub><b>ModerEAS</b></sub>
                 </a>
             </td>
             <td align="center">
@@ -530,6 +544,8 @@ by [`.github/workflows/contributors.yml`](.github/workflows/contributors.yml).
                     <sub><b>wooksong</b></sub>
                 </a>
             </td>
+		</tr>
+		<tr>
             <td align="center">
                 <a href="https://github.com/CelestialCreator">
                     <img src="https://avatars.githubusercontent.com/u/177931942?v=4" width="64;" alt="CelestialCreator"/>
@@ -544,8 +560,6 @@ by [`.github/workflows/contributors.yml`](.github/workflows/contributors.yml).
                     <sub><b>xcsf</b></sub>
                 </a>
             </td>
-		</tr>
-		<tr>
             <td align="center">
                 <a href="https://github.com/danielnaab">
                     <img src="https://avatars.githubusercontent.com/u/136512?v=4" width="64;" alt="danielnaab"/>
