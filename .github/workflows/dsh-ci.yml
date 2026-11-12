@@ -54,8 +54,10 @@ jobs:
           version=$(node -p "require('./package.json').version")
           tgz="build/dsh-llm-wiki-${version}.tgz"
           test -f "$tgz"
-          tar -tzf "$tgz" | grep -q '^package/package.json$'
-          tar -tzf "$tgz" | grep -q '^package/dist/dsh/src/dsh/index.js$'
+          list="$RUNNER_TEMP/bundle-files.txt"
+          tar -tzf "$tgz" > "$list"
+          grep -qx 'package/package.json' "$list"
+          grep -qx 'package/dist/dsh/src/dsh/index.js' "$list"
           extract="$RUNNER_TEMP/dsh-bundle"
           rm -rf "$extract"
           mkdir -p "$extract"
