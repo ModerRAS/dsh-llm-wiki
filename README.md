@@ -496,6 +496,13 @@ by [`.github/workflows/contributors.yml`](.github/workflows/contributors.yml).
                 </a>
             </td>
             <td align="center">
+                <a href="https://github.com/ModerRAS">
+                    <img src="https://avatars.githubusercontent.com/u/28183976?v=4" width="64;" alt="ModerRAS"/>
+                    <br />
+                    <sub><b>ModerRAS</b></sub>
+                </a>
+            </td>
+            <td align="center">
                 <a href="https://github.com/Shanvit7">
                     <img src="https://avatars.githubusercontent.com/u/64424817?v=4" width="64;" alt="Shanvit7"/>
                     <br />
@@ -507,13 +514,6 @@ by [`.github/workflows/contributors.yml`](.github/workflows/contributors.yml).
                     <img src="https://avatars.githubusercontent.com/u/165964?v=4" width="64;" alt="jfraser"/>
                     <br />
                     <sub><b>James Fraser</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/ModerRAS">
-                    <img src="https://avatars.githubusercontent.com/u/28183976?v=4" width="64;" alt="ModerRAS"/>
-                    <br />
-                    <sub><b>ModerRAS</b></sub>
                 </a>
             </td>
             <td align="center">
